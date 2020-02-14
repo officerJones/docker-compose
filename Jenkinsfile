@@ -20,7 +20,7 @@ pipeline {
     stages {
         stage('Build') {
             steps {
-                sh 'docker build --tag ${NAME_TAG}:test'
+                sh 'docker build --tag ${NAME_TAG}:test .'
             }
         }
         stage('Push') {
@@ -31,6 +31,7 @@ pipeline {
                     script {
                         def version = readFile file:"version"
                         sh 'docker tag ${NAME_TAG}:test ${NAME_TAG}:{version}'
+                        // TODO: Decide which registry to push to
                     }
 
                 }
