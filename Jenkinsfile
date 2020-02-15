@@ -15,19 +15,18 @@ pipeline {
     environment {
         HOME="${env.WORKSPACE}"
         PATH="$PATH:${HOME}/.local/bin"
-        // Reads in the docker_hub_credentials into variable DOCKER_CREDENTIALS
-        //  and also creates DOCKER_CREDENTIALS_USR & DOCKER_CREDENTIALS_PSW
-        DOCKER_CREDENTIALS=credentials('docker_hub_credentials')
+        USER="officerjones"
+        DOCKER_HUB_PASS=credentials('docker_hub_password')
         NAME_TAG="docker-compose"
         TEST_TAG="${NAME_TAG}:test"
-        BUILD_TAG="${DOCKER_CREDENTIALS_USR}/${NAME_TAG}"
+        BUILD_TAG="${USER}/${NAME_TAG}"
     }
     stages {
 /*
         stage('Syntax check') {
             steps {
                 // Check the syntax with dockerlint image
-                sh 'docker run -i --rm -v "$PWD/Dockerfile":/Dockerfile ${DOCKER_CREDENTIALS_USR}/dockerlint'
+                sh 'docker run -i --rm -v "$PWD/Dockerfile":/Dockerfile ${USER}/dockerlint'
             }
         }
 */
@@ -54,7 +53,7 @@ pipeline {
                         sh 'docker image rm ${TEST_TAG}'
 
                         // Login & push & logout docker hub
-                        sh 'docker login -u ${DOCKER_CREDENTIALS_USR} -p ${DOCKER_CREDENTIALS_PSW}'
+                        sh 'docker login -u ${USER} -p ${DOCKER_HUB_PASS}'
                         sh 'docker push ${BUILD_TAG}:${version}'
                         sh 'docker logout'
                     }
