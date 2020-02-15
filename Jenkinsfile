@@ -47,19 +47,19 @@ pipeline {
                     script {
                         // Tag test image with production tag
                         def IMAGE_VERSION = readFile "${HOME}/version"
+                        sh 'echo "${env.IMAGE_VERSION}"'
+                        sh 'docker tag ${TEST_TAG} ${BUILD_TAG}:${env.IMAGE_VERSION}'
+
+                        // Cleanup test tag
+                        sh 'docker image rm ${TEST_TAG}'
+
+                        // Login & push & logout docker hub
+                        sh 'docker login -u ${USER} -p ${DOCKER_HUB_PASS}'
+                        sh 'docker push ${BUILD_TAG}:${version}'
+                        sh 'docker logout'
+
+                        // TODO: push to github packages
                     }
-                    sh 'echo "${env.IMAGE_VERSION}"'
-                    sh 'docker tag ${TEST_TAG} ${BUILD_TAG}:${env.IMAGE_VERSION}'
-
-                    // Cleanup test tag
-                    sh 'docker image rm ${TEST_TAG}'
-
-                    // Login & push & logout docker hub
-                    sh 'docker login -u ${USER} -p ${DOCKER_HUB_PASS}'
-                    sh 'docker push ${BUILD_TAG}:${version}'
-                    sh 'docker logout'
-
-                    // TODO: push to github packages
                 }
         }
     }
