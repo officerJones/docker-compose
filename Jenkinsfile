@@ -23,6 +23,7 @@ pipeline {
     }
     stages {
 /*
+        TODO: make it work in jenkins (cmd works on host cli)
         stage('Syntax check') {
             steps {
                 // Check the syntax with dockerlint image
@@ -45,18 +46,23 @@ pipeline {
                 steps {
                     script {
                         // Tag test image with production tag
-                        def version = readFile file:"version"
-                        sh 'echo ${version}'
-                        sh 'docker tag ${TEST_TAG} ${BUILD_TAG}:${version}'
+                        def version = readFile("version")
+                        }
+                    sh 'echo ${version}'
+                    sh 'echo "${version}"'
+                    sh 'echo "${env.version}"'
+                    sh 'echo ${env.version}'
+                    sh 'docker tag ${TEST_TAG} ${BUILD_TAG}:${version}'
 
-                        // Cleanup test tag
-                        sh 'docker image rm ${TEST_TAG}'
+                    // Cleanup test tag
+                    sh 'docker image rm ${TEST_TAG}'
 
-                        // Login & push & logout docker hub
-                        sh 'docker login -u ${USER} -p ${DOCKER_HUB_PASS}'
-                        sh 'docker push ${BUILD_TAG}:${version}'
-                        sh 'docker logout'
-                    }
+                    // Login & push & logout docker hub
+                    sh 'docker login -u ${USER} -p ${DOCKER_HUB_PASS}'
+                    sh 'docker push ${BUILD_TAG}:${version}'
+                    sh 'docker logout'
+
+                    // TODO: push to github packages
                 }
         }
     }
