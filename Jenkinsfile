@@ -26,7 +26,7 @@ pipeline {
         stage('Syntax check') {
             steps {
                 // Check the syntax with dockerlint image
-                sh 'docker run -i --rm -v Dockerfile:/Dockerfile:ro ${DOCKER_CREDENTIALS_USR}/dockerlint'
+                sh 'docker run -i --rm -v "$PWD/Dockerfile":/Dockerfile:ro ${DOCKER_CREDENTIALS_USR}/dockerlint'
             }
         }
         stage('Build') {
