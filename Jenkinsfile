@@ -46,13 +46,10 @@ pipeline {
                 steps {
                     script {
                         // Tag test image with production tag
-                        def version = readFile("version")
+                        env.IMAGE_VERSION = readFile("version")
                         }
-                    sh 'echo ${version}'
-                    sh 'echo "${version}"'
-                    sh 'echo "${env.version}"'
-                    sh 'echo ${env.version}'
-                    sh 'docker tag ${TEST_TAG} ${BUILD_TAG}:${version}'
+                    sh 'echo "${env.IMAGE_VERSION}"'
+                    sh 'docker tag ${TEST_TAG} ${BUILD_TAG}:${IMAGE_VERSION}'
 
                     // Cleanup test tag
                     sh 'docker image rm ${TEST_TAG}'
