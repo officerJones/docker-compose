@@ -23,12 +23,14 @@ pipeline {
         BUILD_TAG="${DOCKER_CREDENTIALS_USR}/${NAME_TAG}"
     }
     stages {
+/*
         stage('Syntax check') {
             steps {
                 // Check the syntax with dockerlint image
-                sh 'docker run -i --rm -v "$PWD/Dockerfile":/Dockerfile dockerlint'
+                sh 'docker run -i --rm -v "$PWD/Dockerfile":/Dockerfile ${DOCKER_CREDENTIALS_USR}/dockerlint'
             }
         }
+*/
         stage('Build') {
             steps {
                 // Build the image with a test tag
