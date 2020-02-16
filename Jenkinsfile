@@ -48,10 +48,10 @@ pipeline {
                     script {
                         // Tag test image with production tag
                         sh """
-                            echo '${IMAGE_VERSION}'
+                            echo 'Tagging with version ${IMAGE_VERSION}'
                             docker tag ${TEST_TAG} ${BUILD_TAG}:${IMAGE_VERSION}
                             docker image rm ${TEST_TAG}
-                            docker login -u ${USER} -p ${DOCKER_HUB_PASS}
+                            echo '${DOCKER_HUB_PASS}' | docker login --username ${USER} --password-stdin
                             docker push ${BUILD_TAG}:${IMAGE_VERSION}
                             docker logout
                         """
