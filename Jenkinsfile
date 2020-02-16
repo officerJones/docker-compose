@@ -15,24 +15,49 @@ pipeline {
     environment {
         HOME="${env.WORKSPACE}"
         PATH="$PATH:${HOME}/.local/bin"
+        USER="officerjones"
+        DOCKER_HUB_PASS=credentials('docker_hub_password')
         NAME_TAG="docker-compose"
+        TEST_TAG="${NAME_TAG}:test"
+        BUILD_TAG="${USER}/${NAME_TAG}"
+        def IMAGE_VERSION=readFile "version"
     }
     stages {
+/*
+        TODO: make it work in jenkins (cmd works on host cli)
+        stage('Syntax check') {
+            steps {
+                // Check the syntax with dockerlint image
+                sh 'docker run -i --rm -v "$PWD/Dockerfile":/Dockerfile ${USER}/dockerlint'
+            }
+        }
+*/
         stage('Build') {
             steps {
-                sh 'docker build --tag ${NAME_TAG}:test'
+                // Build the image with a test tag
+                sh 'docker build --tag ${TEST_TAG} .'
             }
         }
         stage('Push') {
+/*
             when{
                 branch 'master'
             }
+*/
                 steps {
                     script {
-                        def version = readFile file:"version"
-                        sh 'docker tag ${NAME_TAG}:test ${NAME_TAG}:{version}'
-                    }
+                        // Tag test image with production tag
+                        sh """
+                            echo 'Tagging with version ${IMAGE_VERSION}'
+                            docker tag ${TEST_TAG} ${BUILD_TAG}:${IMAGE_VERSION}
+                            docker image rm ${TEST_TAG}
+                            echo '${DOCKER_HUB_PASS}' | docker login --username ${USER} --password-stdin
+                            docker push ${BUILD_TAG}:${IMAGE_VERSION}
+                            docker logout
+                        """
 
+                        // TODO: push to github packages
+                    }
                 }
         }
     }
