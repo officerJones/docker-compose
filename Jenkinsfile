@@ -23,15 +23,15 @@ pipeline {
         def IMAGE_VERSION=readFile "version"
     }
     stages {
-/*
-        TODO: make it work in jenkins (cmd works on host cli)
         stage('Syntax check') {
             steps {
                 // Check the syntax with dockerlint image
-                sh 'docker run -i --rm -v "$PWD/Dockerfile":/Dockerfile ${DOCKER_HUB_USER}/dockerlint'
+                sh 'echo "${PWD}"'
+                sh 'printenv'
+                sh 'echo "${HOME}"'
+                sh 'docker run -i --rm -v "${HOME}/Dockerfile":/Dockerfile ${DOCKER_HUB_USER}/dockerlint'
             }
         }
-*/
         stage('Build') {
             steps {
                 // Build the image with a test tag
