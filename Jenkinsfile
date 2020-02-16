@@ -25,11 +25,8 @@ pipeline {
     stages {
         stage('Syntax check') {
             steps {
-                // Check the syntax with dockerlint image
-                sh 'echo "${PWD}"'
-                sh 'printenv'
-                sh 'echo "${HOME}"'
-                sh 'docker run -i --rm -v "${HOME}/Dockerfile":/Dockerfile ${DOCKER_HUB_USER}/dockerlint'
+                // Check the syntax with dockerlint
+                sh 'dockerlint -f ${HOME}/Dockerfile'
             }
         }
         stage('Build') {
