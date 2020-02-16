@@ -15,11 +15,11 @@ pipeline {
     environment {
         HOME="${env.WORKSPACE}"
         PATH="$PATH:${HOME}/.local/bin"
-        USER="officerjones"
+        // DOCKER_HUB_USER is configured as global variable in Jenkins
         DOCKER_HUB_PASS=credentials('docker_hub_password')
         NAME_TAG="docker-compose"
         TEST_TAG="${NAME_TAG}:test"
-        BUILD_TAG="${USER}/${NAME_TAG}"
+        BUILD_TAG="${DOCKER_HUB_USER}/${NAME_TAG}"
         def IMAGE_VERSION=readFile "version"
     }
     stages {
@@ -28,7 +28,7 @@ pipeline {
         stage('Syntax check') {
             steps {
                 // Check the syntax with dockerlint image
-                sh 'docker run -i --rm -v "$PWD/Dockerfile":/Dockerfile ${USER}/dockerlint'
+                sh 'docker run -i --rm -v "$PWD/Dockerfile":/Dockerfile ${DOCKER_HUB_USER}/dockerlint'
             }
         }
 */
@@ -38,25 +38,42 @@ pipeline {
                 sh 'docker build --tag ${TEST_TAG} .'
             }
         }
-        stage('Push') {
+        stage('Push to Docker Hub') {
             when{
                 branch 'master'
             }
                 steps {
                     script {
-                        // Tag test image with production tag
+                        // Tag test image with production tag & push
                         sh """
                             echo 'Tagging with version ${IMAGE_VERSION}'
                             docker tag ${TEST_TAG} ${BUILD_TAG}:${IMAGE_VERSION}
-                            echo '${DOCKER_HUB_PASS}' | docker login --username ${USER} --password-stdin
+                            echo '${DOCKER_HUB_PASS}' | docker login --username ${DOCKER_HUB_USER} --password-stdin
                             docker push ${BUILD_TAG}:${IMAGE_VERSION}
                             docker logout
                         """
-
-                        // TODO: push to github packages
                     }
                 }
         }
+/*
+         stage('Push to Github Packages') {
+            when{
+                branch 'master'
+            }
+                steps {
+                    script {
+                        // Tag test image with production tag & push
+                        sh """
+                            echo 'Tagging with version ${IMAGE_VERSION}'
+                            docker tag ${TEST_TAG} ${BUILD_TAG}:${IMAGE_VERSION}
+                            echo '${DOCKER_HUB_PASS}' | docker login --username ${DOCKER_HUB_USER} --password-stdin
+                            docker push ${BUILD_TAG}:${IMAGE_VERSION}
+                            docker logout
+                        """
+                    }
+                }
+        }
+*/
     }
     post {
         success {
