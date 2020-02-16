@@ -20,6 +20,7 @@ pipeline {
         NAME_TAG="docker-compose"
         TEST_TAG="${NAME_TAG}:test"
         BUILD_TAG="${USER}/${NAME_TAG}"
+        def IMAGE_VERSION=readFile "version"
     }
     stages {
 /*
@@ -46,18 +47,14 @@ pipeline {
                 steps {
                     script {
                         // Tag test image with production tag
-                        def version = readFile "${HOME}/version"
-                        sh 'echo ${version}'
-                        sh 'echo "${version}"'
-                        sh 'docker tag ${TEST_TAG} ${BUILD_TAG}:${version}'
-
-                        // Cleanup test tag
-                        sh 'docker image rm ${TEST_TAG}'
-
-                        // Login & push & logout docker hub
-                        sh 'docker login -u ${USER} -p ${DOCKER_HUB_PASS}'
-                        sh 'docker push ${BUILD_TAG}:${version}'
-                        sh 'docker logout'
+                        sh """
+                            echo '${IMAGE_VERSION}'
+                            docker tag ${TEST_TAG} ${BUILD_TAG}:${IMAGE_VERSION}
+                            docker image rm ${TEST_TAG}
+                            docker login -u ${USER} -p ${DOCKER_HUB_PASS}
+                            docker push ${BUILD_TAG}:${IMAGE_VERSION}
+                            docker logout
+                        """
 
                         // TODO: push to github packages
                     }
