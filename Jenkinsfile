@@ -48,7 +48,6 @@ pipeline {
                         sh """
                             echo 'Tagging with version ${IMAGE_VERSION}'
                             docker tag ${TEST_TAG} ${BUILD_TAG}:${IMAGE_VERSION}
-                            docker image rm ${TEST_TAG}
                             echo '${DOCKER_HUB_PASS}' | docker login --username ${USER} --password-stdin
                             docker push ${BUILD_TAG}:${IMAGE_VERSION}
                             docker logout
@@ -61,6 +60,7 @@ pipeline {
     }
     post {
         success {
+            sh "docker image rm ${TEST_TAG}"
             setBuildStatus("Build succeeded", "SUCCESS");
         }
         failure {
