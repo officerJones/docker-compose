@@ -39,11 +39,9 @@ pipeline {
             }
         }
         stage('Push') {
-/*
             when{
                 branch 'master'
             }
-*/
                 steps {
                     script {
                         // Tag test image with production tag
